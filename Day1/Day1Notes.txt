@@ -1,0 +1,78 @@
+Day1:
+40 Hrs kafka Training(10 Days)
+Agenda:
+TOC Walkthrough
+Instructions: Mute, Discussion & Question: unmute, Pacing: rate of speech: feedback immediately
+Trainer: D Sai Natarajan, 15 Yrs Exp
+Pre-test:		Linux, SQL
+Trainer & Participants introduction
+Participants introduction
+
+Domain, Exp, Dev, Admin, Linux, SQL, Message queue, Kafka
+Trainer: domain: retail, Elearning, Ecommerce, Exp: 15 Yrs, Dev: 15Yrs, Java, Spring, etc , Admin: 10Yrs, Kafka, cloud, Linux: Ubuntu, centos, SQL: 15yrs mysql, oracle, Message: rabbitmq, activemq, zmq, Kafka: 10Yrs, Cloudera, Confluent, dev+Admin
+
+Session start
+
+Kafka introduction
+Brief history and intro to the world and idea behind kafka
+Messaging VS Streaming systems
+Kafka Architecture
+Kafka topics, Brokers, Topics, Partitions, Replication, Producers, Consumers, Messages as Key Value Pairs
+Scalability of Kafka, Messages, Offsets, Offset Commits, Message Routing, Consumer Groups
+Kafka On Docker containers
+Bitnami images, Kafka & Zookeeper Single node cluster on Docker-compose
+Kafka Single node setup Overview on Linux/Windows
+Many To Many Model of Messaging in Kafka Demo
+
+Break time: 4 to 4.15 PM !
+
+Kafka introduction
+Message Queue Intro, Comparison Kafka & Rabbitmq, Kafka Intro
+Kafka Architecture
+Push vs Pull Model
+
+
+
+
+Lab Name:                  kafkafa-d-sainatarajan-637-1d1ad526
+Lab IP  :                  172.19.66.165
+Lab Status:                Power On In Progress
+Remaining Lab Duration:    1500 minutes
+
+
+Break time 4.20 to 4.35 PM!
+
+Lab:
+Bitnami images, Kafka & Zookeeper Single node cluster on Docker-compose
+Kafka Single node setup Overview on Linux/Windows
+Many To Many Model of Messaging in Kafka Demo
+
+
+bootstrap-server, broker-list => 9092
+zookeeper                     => 2181
+
+kafka-topics.sh --create --bootstrap-server localhost:9092 --partitions 2 --replication-factor 1 --topic demotopic1
+
+# list the topic created above
+kafka-topics.sh --list --bootstrap-server localhost:9092 
+
+# start a console producer
+kafka-console-producer.sh --bootstrap-server localhost:9092  --topic demotopic1
+>hello Amdocs
+>Fusion is Awesome
+>msg3
+>msg4
+
+# duplicate your putty
+
+# start a console consumer
+kafka-console-consumer.sh --bootstrap-server localhost:9092  --topic demotopic1 --from-beginning
+# observe the messages consumed by the consumer
+
+# produce more messages from the producer in the other putty session
+
+
+
+
+Short link:
+http://surl.li/robwm

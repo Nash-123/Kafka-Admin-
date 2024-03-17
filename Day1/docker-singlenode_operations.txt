@@ -1,0 +1,24 @@
+# on the putty session on node1, after starting the single node dockercompose cluster
+docker exec -it singlenode_kafka_1 bash
+kafka-topics.sh --create --bootstrap-server localhost:9092 --partitions 2 --replication-factor 1 --topic demotopic1
+
+# list the topic created above
+kafka-topics.sh --list --bootstrap-server localhost:9092 
+
+# start a console producer
+kafka-console-producer.sh --bootstrap-server localhost:9092  --topic demotopic1
+>hello Amdocs
+>Fusion is Awesome
+>msg3
+>msg4
+
+# duplicate your putty
+docker exec -it singlenode_kafka_1 bash
+
+# start a console consumer
+kafka-console-consumer.sh --bootstrap-server localhost:9092  --topic demotopic1 --from-beginning
+# observe the messages consumed by the consumer
+
+# produce more messages from the producer in the other putty session
+
+

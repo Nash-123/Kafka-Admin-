@@ -1,0 +1,100 @@
+Day2:
+Messages as Key Value Pairs
+Message Routing, Message Ordering Consumer Groups
+Kafka Architecture deep dive, Brokers and Topics
+Replication of topics
+Producers and messages keys
+Consumer groups & Scalability
+Console Producer & Consumer, Advanced Configuration for Producer & Consumers
+Producer CLI
+Consumer CLI
+Serializers, Compression, Idempotence, Batching, Sync & Async, acks, Polling, Delivery Semantics
+Groups and Offsets
+Offsets and semantics for delivery
+Fault tolerance model of Kafka
+Kafka data Guarantees
+
+
+Messages as Key Value Pairs
+
+Message Structure: key, value pair
+Message Ordering & Routing
+
+Message	-> Record => Will have 2 components -> (Key, value)
+
+Key is nullable(optional) -> records(messages) without key will be created with null values assigned to the key
+
+Record1 => <order1, '{"prd":"redmi6", "price":10000, "qty": 2}'>
+
+Key => order1
+Value => '{"prd":"redmi6", "price":10000, "qty": 2}'
+
+msg1		-> null key
+msg2		-> null key
+
+
+Message Routing:
+Message in a topic will be produced to which partition is determined by a routing algorithm
+TargetPartition#	= HASH(key)%NumPartitions
+
+HASH 			-> murmur3
+NumPartitions	-> number of partitions in the topic
+key				-> key of the message(record)
+
+Record1 => <order1, '{"prd":"redmi6", "price":10000, "qty": 2}'>
+Record2 => <order1, '{"prd":"oppo 10", "price":12000, "qty": 1}'>
+
+TargetPartition#	= HASH(key)%NumPartitions
+					= murmur3("order1")%3
+					= 234435%3
+					= 2
+
+NumPartitions = 3
+AnyNumber%NumPartitions -> 
+AnyNumber%3 => 0,1,2 -> this value will always be a valid partition number
+
+For a message with null key, it can be routed randomly to any partition
+
+
+High Availability => If the system remains operational even under failing nodes, then the system considered fault tolerant or Highly available
+
+Number of brokers that can fail without losing data ReplicationFactor-1
+#NumBrokersThatCanFail = ReplicationFactor-1
+
+ReplicationFactor=1 => 1 broker failure will result in data loss
+#NumBrokersThatCanFail = 1-1
+ReplicationFactor=2 => 2 brokers should fail simultaneously for data loss
+#NumBrokersThatCanFail = 2-1
+
+movei.mp4		=> 1GB => make a copy of the movie wtih movei2.mp4
+movei2.mp4		=> 1GB
+
+Number of active consumers in the consumer group will be not exceeding the number of partitions in the topic. 
+IF there are 10 partitions in the topic, 11 consumers in the consumer group. Only 10 consumers in the group will be active and each will consumer from 1 partition assigned by kafka. The 11th consumer will remain idle
+
+What about message with null key? Ans: Messages without key(null key) will be routed randomly to any partition in same topic
+
+Message routing will be random or looks like round robin when the message key is null
+Consumers may read the messages in any order from any of the partitions, within the partition records will be read in the same order as they are published
+
+
+Break from 4 PM to 4.15 PM!
+
+
+Linux Installation of Kafka
+
+Single Node Apache Kafka Installation
+
+
+export PATH=$PATH:/usr/kafka/bin
+
+zookeeper-server-start.sh -daemon /usr/kafka/config/zookeeper.properties
+jps
+kafka-server-start.sh -daemon /usr/kafka/config/server.properties
+jps
+
+
+kafka-ubuntu-installation-steps.txt
+
+Pls enter done in the chat once you finish the kafka installation on node02
+

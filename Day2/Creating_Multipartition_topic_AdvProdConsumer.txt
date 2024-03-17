@@ -1,0 +1,27 @@
+# stop all existing producers & consumers
+# connect to the container if needed 
+# docker exec -it singlenode_kafka_1 bash
+kafka-topics.sh --create --bootstrap-server localhost:9092 --topic testtopic1 --replication-factor 1 --partitions 2
+
+kafka-topics.sh --list --bootstrap-server localhost:9092
+
+kafka-topics.sh --describe --bootstrap-server localhost:9092 --topic testtopic1
+kafka-console-producer.sh --topic testtopic1 --bootstrap-server localhost:9092
+>msg1
+>msg2
+>msg3
+>msg4
+>msg5
+
+# connect to the container from another terminal
+docker exec -it singlenode_kafka_1 bash
+# start a consumer 
+kafka-console-consumer.sh --topic testtopic1 --from-beginning --bootstrap-server localhost:9092 --property "print.key=true" --property "print.offset=true"  --property "print.partition=true"
+# observe the key is null for all records, offset keeps increasing, message ordering across partitions are random
+
+# Stop the existing producer and create a new producer
+kafka-console-producer.sh --topic testtopic1 --bootstrap-server localhost:9092 --property "parse.key=true" --property "key.separator=;"
+>order1;{"prd":"redmi"}
+>order2;{"prd":"oppo"}
+>order1;{"prd":"iPhone"}
+# notice order1 messages will go to same partition
