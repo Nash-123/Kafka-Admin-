@@ -1,0 +1,22 @@
+# connect to the kafka1 broker of the cluster and create topic
+docker exec -it kafkamultinode_kafka1_1 bash
+kafka-topics.sh --create --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 2 --topic test1
+kafka-topics.sh --list --bootstrap-server kafka1:9092
+exit
+
+# connect to the zookeeper container
+docker exec -it kafkamultinode_zookeeper_1 bash
+zkCli.sh 
+ls /
+ls /brokers
+ls /brokers/ids
+get /brokers/ids/1
+get /brokers/ids/2
+ls /brokers/topics
+ls /brokers/topics/test1/partitions
+get /brokers/topics/test1/partitions/0/state
+ls /cluster
+
+get /cluster/id
+# Every cluster when the first broker initializes, a new cluster ID will be generatoed
+

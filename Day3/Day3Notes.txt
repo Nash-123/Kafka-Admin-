@@ -1,0 +1,85 @@
+Day3:
+ZooKeeper 
+Multi brokers and discoveries 
+Metadata of Kafka in Zookeeper
+How it works inside Kafka
+Zookeeper hands-on 
+Summary 
+Quiz 
+Installation instructions of Multbroker Kafka Cluster 
+listeners & advertised listeners
+Topic Layout & describe topic Command, min in sync replicas, compacted topics, fixed size topics
+Fault tolerance model of Kafka
+Kafka data Guarantees
+
+
+Multinode Kafka & Zookeeper in Docker compose
+MultiNode zookeeper setup
+Serializers, Compression, Idempotence, Batching, Sync & Async, acks, Polling, Delivery Semantics
+Groups and Offsets
+Offsets and semantics for delivery
+
+
+ZooKeeper:
+Is a distributed storage and coordinator
+Services of ZooKeeper
+	i) It provides persistence(storage) to important kafka metadata
+	ii) It provides notifications(coordination) about broker details
+
+ZooKeeper is distributed(multinode) system made of Leader & Follower nodes
+Leader -> write, read
+follower -> read, client cannot directly perform write operation on follower
+			If a client commands a follower with write operation, the follower will forward the write request to the leader
+
+Notification system of ZooKeeper works as a Watch mechanism
+
+Kraft => Replacement for ZooKeeper service
+Kafka 2 => ZooKeeper Mandatory
+Kafka 3 => ZooKeeper or Kraft
+
+ZooKeeper Cli: Metadata stored by kafka list
+
+Multinode kafka => node1
+
+ZooKeeper is like a linux filesystem
+root folder /
+folders => znodes
+data 
+znodes can have more znodes(folders) or they can have data
+
+Break from 3.45 PM to 4 PM!
+
+Kafka Mutli node opretations:
+Topics with partitions & replication
+Fault tolerance model of kafka
+
+
+Topic: testtopic1       TopicId: o0NzGTn0Qs2DumYXqxKg7w PartitionCount: 3       ReplicationFactor: 2    Configs:
+   Partition: 0    Leader: 3       Replicas: 3,1   Isr: 3,1
+   Partition: 1    Leader: 1       Replicas: 1,2   Isr: 1,2
+   Partition: 2    Leader: 2       Replicas: 2,3   Isr: 2,3
+
+
+After broker.id=3 went down
+Topic: testtopic1       TopicId: o0NzGTn0Qs2DumYXqxKg7w PartitionCount: 3       ReplicationFactor: 2    Configs:
+   Partition: 0    Leader: 1       Replicas: 3,1   Isr: 1
+   Partition: 1    Leader: 1       Replicas: 1,2   Isr: 1,2
+   Partition: 2    Leader: 2       Replicas: 2,3   Isr: 2
+
+ISR -> In Sync Replicas
+
+
+kafka-consumer-groups.sh --bootstrap-server kafka1:9092 --all-groups --describe
+
+PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG   CONSUMER-ID  HOST          
+0          2               2               0     b228         /172.19.0.3   
+1          18              18              0     b228         /172.19.0.3   
+2          40              40              0     184f         /172.19.0.4   
+
+
+
+# list all consumer groups consuming from every topic
+kafka-consumer-groups.sh --bootstrap-server kafka1:9092 --all-groups --list
+
+kafka-consumer-groups.sh --bootstrap-server kafka1:9092 --all-groups --describe
+
