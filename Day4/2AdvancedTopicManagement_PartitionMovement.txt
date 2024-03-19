@@ -1,0 +1,37 @@
+nano topics-to-move.json
+{"topics":  [{"topic": "test1"}],
+ "version":1
+}
+
+Ctrl+O+Enter
+Ctrl+X
+
+docker cp topics-to-move.json kafkamultinode_kafka1_1:/
+
+docker exec -it kafkamultinode_kafka1_1 bash
+
+kafka-reassign-partitions.sh --topics-to-move-json-file topics-to-move.json --broker-list "1,2" --generate --bootstrap-server kafka1:9092
+# above command will generate the migration plan, copy only the segment after the "Proposed partition reassignment configuration" text and save it to a file
+
+exit
+# exit to the host
+nano new-layout.json
+{"version":1,"partitions":[{"topic":"test1","partition":0,"replicas":[2,1],"log_dirs":["any","any"]},{"topic":"test1","partition":1,"replicas":[1,2],"log_dirs":["any","any"]},{"topic":"test1","partition":2,"replicas":[2,1],"log_dirs":["any","any"]},{"topic":"test1","partition":3,"replicas":[1,2],"log_dirs":["any","any"]},{"topic":"test1","partition":4,"replicas":[2,1],"log_dirs":["any","any"]},{"topic":"test1","partition":5,"replicas":[1,2],"log_dirs":["any","any"]},{"topic":"test1","partition":6,"replicas":[2,1],"log_dirs":["any","any"]},{"topic":"test1","partition":7,"replicas":[1,2],"log_dirs":["any","any"]}]}
+
+
+Ctrl+O+Enter
+Ctrl+X
+
+docker cp new-layout.json kafkamultinode_kafka1_1:/
+
+docker exec -it kafkamultinode_kafka1_1 bash
+
+ls /*.json
+
+cat topics-to-move.json
+
+kafka-reassign-partitions.sh --reassignment-json-file new-layout.json --execute  --bootstrap-server kafka1:9092
+
+kafka-topics.sh --describe --bootstrap-server kafka1:9092 --topic test1
+# Observe that all partitions of the test1 topic is only on broker 1,2
+
