@@ -1,0 +1,29 @@
+docker exec -it kafkamultinode_kafka1_1 bash
+
+kafka-topics.sh --create --topic newdemo --bootstrap-server kafka1:9092 --replication-factor 2 --partitions 3
+
+kafka-console-producer.sh --topic newdemo --bootstrap-server kafka1:9092 \
+--compression-codec gzip \
+--max-block-ms 100 \
+--message-send-max-retries  50 \
+--request-required-acks all \
+--producer-property  "enable.idemopotence=true" \
+--producer-property  "batch.size=16384"
+>new
+>messages
+>are
+>part of 
+>newdemo
+>awesome
+>demo
+
+# start the consumer from another terminal
+docker exec -it kafkamultinode_kafka1_1 bash
+
+kafka-console-consumer.sh --bootstrap-server kafka1:9092 \
+--topic newdemo \
+--consumer-property "auto.offset.reset=earliest" \
+--consumer-property "max.poll.records=2"
+
+
+
