@@ -1,0 +1,54 @@
+Day6:
+Kafka Connect
+Connect Standalone & Connect Distributed
+
+Kafka Stream, SerDes
+Confluent Kafka and KSQL
+Kafka case stories - Real world examples and implementations
+
+Security in Kafka
+Kafka security
+Plaintext, SSL, SASL, SASL_Plaintext, SASL_SSL
+key files, ca, keystore, truststore, kafka & zookeeper security configurations
+Kafka ACLs
+Producing & Consuming in a Secured Kafka Cluster
+Security overheads on performance & throughput
+
+
+Kafka Connect
+Connect Standalone & Connect Distributed
+
+
+https://docs.confluent.io/kafka-connectors/jdbc/current/source-connector/overview.html
+
+
+Break from 4.20 to 4.35 PM!
+
+https://www.confluent.io/product/connectors/
+https://docs.confluent.io/platform/current/connect/index.html
+https://docs.confluent.io/platform/current/connect/kafka_connectors.html
+
+
+Kafka Stream, SerDes
+	Stream processing
+	Stream is a continuos unbounded data
+
+Confluent Kafka and KSQL
+Kafka case stories - Real world examples and implementations
+
+Confluent Kafka: Enterprise edition of Kafka
+Apache Kafka
+Confluent Kafka:
+	i) Community Editition
+	ii) Enterprise Editition
+
+Components:
+	i) Admin Dashboard(Web UI)	-> Control Center
+	ii) Rest Proxy
+	iii) Schema Registry
+	iv) Ksqldb
+
+Ksqldb	-> It offers SQL syntax to interact with Kafka
+
+
+

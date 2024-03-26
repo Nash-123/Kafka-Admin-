@@ -1,0 +1,17 @@
+
+docker-compose ps
+# Confluent control center runs on port 9021
+Activities -> Mozilla Browser -> 192.168.56.104:9021
+Controlcenter.cluster -> click the link
+
+Left menu: Brokers, Topics
+Topics -> Right Side -> Add Topic
+Topic Name: AmdocsDemo
+Number of Partitions: 2
+Create with Defaults
+Messages -> Producer a message -> Click Produce Button
+# Check the response
+# Jump to offset: 0: Partition: 0
+
+
+

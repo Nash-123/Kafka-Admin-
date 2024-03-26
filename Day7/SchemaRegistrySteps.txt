@@ -1,0 +1,47 @@
+Browser: localhost:8081
+
+Terminal:
+curl localhost:8081
+# Create a new schema by sending a POST request
+curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json"  --data '{"schema": "{\"type\":\"record\",\"name\":\"Payment\",\"namespace\":\"io.confluent.examples.clients.basicavro\",\"fields\":[{\"name\":\"id\",\"type\":\"string\"},{\"name\":\"amount\",\"type\":\"double\"}]}"}'   http://localhost:8081/subjects/payment-schema/versions
+
+Browser: 
+http://localhost:8081/schemas
+
+curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data '{"schema": "{\"type\":\"record\",\"name\":\"Payment\",\"namespace\":\"io.confluent.examples.clients.basicavro\",\"fields\":[{\"name\":\"id\",\"type\":\"string\"},{\"name\":\"amount\",\"type\":\"double\"},{\"name\":\"region\",\"type\":\"string\",\"default\":\"\"}]}"}'   http://localhost:8081/subjects/transactions1-value/versions
+  
+
+docker exec -it broker bash
+
+kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 2 --topic payment
+
+# list topic
+kafka-topics --list --bootstrap-server localhost:9092
+
+
+curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json"  --data '{"schema": "{\"type\":\"record\",\"name\":\"Payment\",\"namespace\":\"io.confluent.examples.clients.basicavro\",\"fields\":[{\"name\":\"id\",\"type\":\"string\"},{\"name\":\"amount\",\"type\":\"double\"}]}"}'   http://schema-registry:8081/subjects/payment-value/versions
+
+exit
+docker exec -it schema-registry  bash
+
+export LOG_DIR=/home/appuser/logs
+mkdir /home/appuser/logs
+# starting the avro producer
+kafka-avro-console-producer --bootstrap-server broker:29092 --topic payment --property schema.registry.url=http://schema-registry:8081 --property value.schema='{"type":"record", "name":"Payment", "fields":[{"name":"id","type":"string"},{"name":"amount","type":"double"}] }'
+{"id": "1", "amount":1000.5}
+{"id": "2", "amount":5000.5}
+{"id": "3", "amount":1500.5}
+{"id": "2", "amount":"5000.5"}
+
+# kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic payment --from-beginning --group group1 --property="print.key=true" --property="print.offset=true"  --property="print.partition=true"  --property="print.value=true"
+
+# export LOG_DIR=/home/appuser/logs
+
+kafka-avro-console-consumer --topic payment --bootstrap-server broker:29092 --property schema.registry.url=http://localhost:8081 --from-beginning
+# observe the record with invalid schema is not received because it was never successfully produced
+
+
+
+
+
+

@@ -1,0 +1,57 @@
+Day7:
+Kafka Stream, SerDes
+Confluent Kafka and KSQL
+Kafka case stories - Real world examples and implementations
+
+Security in Kafka
+Kafka security
+Plaintext, SSL, SASL, SASL_Plaintext, SASL_SSL
+key files, ca, keystore, truststore, kafka & zookeeper security configurations
+Kafka ACLs
+Producing & Consuming in a Secured Kafka Cluster
+Security overheads on performance & throughput
+
+Kafka Without Zookeeper, Kraft
+K8S - with and without zookeeper 
+Kafka Monitoring and administration
+Setup Monitoring using Grafana and Prometheus
+
+Control center => Admin Dashboard Web UI
+Topic creation, monitoring, produce & consume few messages
+
+
+
+http://surl.li/rtiwd 
+Folder shared via SharePoint
+
+KsqlDB:
+	Interact with Kafka using SQL queries using KsqlDB, topics can be mapped to a table in KsqlDB
+
+KSQL: Exposes an SQL interface to Kafka topics & messages
+Create table	-> topic creation
+Producer		-> Insert QUery
+Consumer		-> Select QUery
+
+
+Stream: Ubounded list of events/messages, Table: Records are collated with keys and messages with same key are grouped & latest state of a key is maintained
+
+https://developer.confluent.io/courses/ksqldb/streams-and-tables/
+
+
+Break from 4.16 to 4.31 PM!
+
+Rest Proxy
+Schema Registry
+
+
+
+
+
+
+
+
+
+
+
+
+

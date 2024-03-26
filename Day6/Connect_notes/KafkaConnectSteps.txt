@@ -1,0 +1,32 @@
+# test.txt file should be in current folder where the command proment/terminal is pointing to
+# Run all below commands on linux machine:
+docker exec -it kafkamultinode_kafka1_1 bash
+ls /opt/bitnami/kafka/config/
+cat /opt/bitnami/kafka/config/connect-file-source.properties
+exit
+docker cp kafkamultinode_kafka1_1:/opt/bitnami/kafka/config/connect-standalone.properties  $HOME/
+nano $HOME/connect-standalone.properties
+# change the bootstrap-server value to kafka1 as given below
+bootstrap.servers=kafka1:9092
+plugin.path=/opt/bitnami/kafka/libs
+
+
+Ctrl+O+Enter
+Ctrl+X
+docker cp $HOME/connect-standalone.properties kafkamultinode_kafka1_1:/opt/bitnami/kafka/config/ 
+
+echo "{\"message\": \"This is awesome\"}" > $HOME/test.txt
+echo "{}" >> $HOME/test.txt
+cat $HOME/test.txt
+docker cp $HOME/test.txt kafkamultinode_kafka1_1:/
+docker exec -it  kafkamultinode_kafka1_1 bash
+cat test.txt
+
+# Create the topic
+kafka-topics.sh --create --bootstrap-server kafka1:9092 --replication-factor 1 --partitions 1 --topic connect-test
+
+kafka-topics.sh --list  --bootstrap-server kafka1:9092 
+
+connect-standalone.sh /opt/bitnami/kafka/config/connect-standalone.properties   /opt/bitnami/kafka/config/connect-file-source.properties   /opt/bitnami/kafka/config/connect-console-sink.properties
+
+# observe the 2 lines from the input test.txt file printed on the screen

@@ -1,0 +1,53 @@
+cd $HOME/confluentkafka
+docker-compose stop
+
+# create the prometheus container
+docker network create promnet 
+docker run -d -p 9090:9090 --name prometheus --network promnet bitnami/prometheus
+docker ps
+docker run -d -p 9100:9100 --name node-exporter1 --network promnet bitnami/node-exporter
+docker ps
+Browser: 192.168.56.104:9090 
+Browser: 192.168.56.104:9100 
+docker exec -it prometheus bash
+ls conf
+exit
+cd $HOME
+docker cp prometheus:/opt/bitnami/prometheus/conf/prometheus.yml .
+ls
+nano prometheus.yml
+# add the below 3 lines at the end of the file, ensure indentations are exactly as given below
+
+  - job_name: "node-exporter"
+    static_configs:
+      - targets: ["node-exporter1:9100"]
+
+Ctrl+O+Enter
+Ctrl+X
+
+docker cp prometheus.yml prometheus:/opt/bitnami/prometheus/conf/
+
+docker restart prometheus
+
+docker ps
+# ensure prometheus container is running
+
+Browser: 192.168.56.104:9090 -> Status -> target => node-exporter (1/1 up)
+# home page or prometheus, search for below query
+node_cpu_seconds_total		-> graph
+
+# launch the grafana container
+docker run -d --name=grafana -p 3000:3000 --network promnet grafana/grafana
+
+# Browser: http://192.168.56.104:3000/login
+# give new password also as : admin, admin
+Menu -> Connection -> Search -> Prometheus
+Add new data source -> Prometheus Server URL=> http://prometheus:9090
+#Scroll down
+ Save & Test -> Green Tick mark
+
+# menu -> Dashboards -> Create new Dashboard
+Import Dashboard -> 1860		-> Load
+Source		-> Prometheus
+Import
+
