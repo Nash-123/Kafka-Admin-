@@ -1,0 +1,26 @@
+docker stop node-exporter1
+docker stop prometheus
+docker stop grafana
+
+# DOwnload the prometheus_kafka folder from one drive link Day9 folder
+# Install winscp on the Windows base machine
+# Login to the node01 VM from winscp
+# copy the file prometheus_kafka.zip into the node01 Vm using winscp
+# open putty to the node01 VM
+unzip prometheus_kafka.zip
+cd prometheus_kafka
+docker-compose up -d
+
+Browser on Ubuntu Linux: localhost:7071
+Browser on Ubuntu Linux: localhost:9090 => search for kafka
+Browser on Ubuntu Linux: localhost:3000 => Connection -> Add Connection -> Prometheus
+URL: http://prometheus:9090
+Click -> Save & Test
+Menu -> New Dashboard -> Import -> 11962 -> Load
+
+# https://grafana.com/grafana/dashboards/11962-kafka-metrics/
+
+
+
+
+

@@ -1,0 +1,11 @@
+
+
+sudo wget -P /opt/kafka/prometheus/ https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.12.0/jmx_prometheus_javaagent-0.12.0.jar
+
+wget https://raw.githubusercontent.com/prometheus/jmx_exporter/master/example_configs/kafka-2_0_0.yml
+export KAFKA_OPTS="-javaagent:/opt/kafka/prometheus/jmx_prometheus_javaagent-0.12.0.jar=7071:/opt/kafka/prometheus/kafka-2_0_0.yml"
+
+export KAFA_HEAP_OPTS="-Xmx1000M -Xms1000M"
+
+bin/kafka-server-start.sh config/server.properties
+
