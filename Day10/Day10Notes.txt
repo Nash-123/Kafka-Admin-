@@ -1,0 +1,53 @@
+Day10:
+key files, ca, keystore, truststore, kafka & zookeeper security configurations
+Kafka ACLs
+K8S - with and without zookeeper 
+Kafka Mirror Maker introduction
+Moving Data in and out of Kafka Options
+Troubleshooting Kafka
+Confluent Kafka Vs Apache Kafka
+Kafka Certification questions & Answers
+
+
+
+
+K8S - with and without zookeeper  => Strimzi
+Strimzi => Create Kafka Cluster, Producer, Consumer & producer & consumer with SSL
+
+
+advertised.listener=PLAINTEXT://192.168.1.10:9092,SSL_SASL://100.10.23.12:9093
+
+Break from 4 to 4.15 PM!
+
+kubectl get kafka -n kafka
+
+https://github.com/strimzi/client-examples/tree/main/java/kafka
+
+
+Kafka Mirror Maker introduction		-> Apache Kafka
+	DR Solution for Kafka
+	Real-time Cluster Replication
+-> Mirror makers runs on the Kafka Connect
+
+Confluent -> replicator => proritory solution for DR & replication
+mirror-maker-connect.properties  =>
+# enable and configure individual replication flows
+A->B.enabled = true
+
+# regex which defines which topics gets replicated. For eg "foo-.*"
+A->B.topics = .*
+
+B->A.enabled = true
+B->A.topics = .*
+
+
+A -> topic1	-> mirror maker replication => B -> A.topic1
+
+
+
+
+
+
+
+
+

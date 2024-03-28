@@ -1,0 +1,440 @@
+####################
+Kafka installion
+####################
+
+--> java 8
+--> kafka_2.12-2.5.0.tgz  (minimum kafka 2.5 required for kafka security)
+--> jce_policy-8.zip
+
+jce download link
+
+--> https://www.oracle.com/in/java/technologies/javase-jce8-downloads.html
+
+# unzip jce_policy-8.zip
+
+# cp UnlimitedJCEPolicyJDK8/local_policy.jar /opt/java/jre/lib/security/ 
+
+# cp UnlimitedJCEPolicyJDK8/US_export_policy.jar /opt/java/jre/lib/security/
+
+
+downd kafka - kafka_2.12-2.5.0.tgz
+
+# tar -xvzf kafka_2.12-2.5.0.tgz 
+
+# mv kafka_2.12-2.5.0 /opt/kafka
+
+# nano /etc/profile.d/kafka.sh
+export KAFKA_HOME=/opt/kafka
+export PATH=$PATH:$KAFKA_HOME/bin
+
+# source /etc/profile.d/kafka.sh
+
+# cd /opt/kafka/config
+
+--> zookeeper Conf
+
+# nano zookeeper.properties
+
+dataDir=/opt/kafka/data/zookeeper
+clientPort=2181
+admin.enableServer=true
+admin.serverPort=8080
+
+server.1=localhost:2888:3888
+ 
+# bin/zookeeper-server-start.sh -daemon config/zookeeper.properties
+
+# jps
+1802 QuorumPeerMain
+
+# zookeeper-shell.sh localhost:2181
+
+--> kafka conf
+
+# cd /opt/kafka/config
+
+# mv server.properties server-0.properties 
+
+# nano server-0.properties 
+
+broker.id=0
+log.dirs=/opt/kafka/data/broker-0
+listeners=PLAINTEXT://localhost:9092
+advertised.listeners=PLAINTEXT://localhost:9092
+zookeeper.connect=localhost:2181
+
+# cp server-0.properties server-1.properties 
+
+# nano server-1.properties 
+
+broker.id=1
+log.dirs=/opt/kafka/data/broker-1
+listeners=PLAINTEXT://localhost:9093
+advertised.listeners=PLAINTEXT://localhost:9093
+zookeeper.connect=localhost:2181
+
+# cp server-0.properties server-2.properties 
+
+broker.id=2
+log.dirs=/opt/kafka/data/broker-2
+listeners=PLAINTEXT://localhost:9094
+advertised.listeners=PLAINTEXT://localhost:9094
+zookeeper.connect=localhost:2181
+
+--> start kafka
+
+# kafka-server-start.sh -daemon /opt/kafka/config/server-0.properties
+# kafka-server-start.sh -daemon /opt/kafka/config/server-1.properties
+# kafka-server-start.sh -daemon /opt/kafka/config/server-2.properties
+
+# jps
+
+13921 Kafka
+13138 Kafka
+1802 QuorumPeerMain
+13530 Kafka
+
+# zookeeper-shell.sh localhost:2181
+
+ls /brokers/ids
+[0, 1, 2]
+
+###########################################
+
+SSL/TLS Security 
+
+1.What is SSL 
+2.What is Certification Authority,Keystore and TrustStore
+3.How SSL Works In Kafka
+
+
+#############################################################
+									ZOOKEEPER
+#############################################################
+
+
+1. Fix the certificate authority(CA)
+2. Create the trustore
+3. Create the keystore
+4. Create certificate signing request
+5. sing the certificate using CA
+6. Import the signed certificate and CA into keystore
+
+Note : Steps 2 to 6 should be performed on each node. For Example, in case of zookeeper security it should be performed for zookeepers and ZK Clients(brokers, Zookeeper-shell, etc)
+# mkdir ssl
+
+Example steps to implement CA, truststore and keystore for zookeeper SSL security :
+𝟏. 𝐆𝐞𝐧𝐞𝐫𝐚𝐭𝐞 𝐂𝐀 == openssl req -new -x509 -keyout ca-key -out ca-cert -days 3650
+𝟐. 𝐂𝐫𝐞𝐚𝐭𝐞 𝐓𝐫𝐮𝐬𝐭𝐬𝐭𝐨𝐫𝐞 == keytool -keystore kafka.zookeeper.truststore.jks -alias ca-cert -import -file ca-cert
+𝟑. 𝐂𝐫𝐞𝐚𝐭𝐞 𝐊𝐞𝐲𝐬𝐭𝐨𝐫𝐞 == keytool -keystore kafka.zookeeper.keystore.jks -alias zookeeper -validity 3650 -genkey -keyalg RSA -ext SAN=dns:localhost
+𝟒. 𝐂𝐫𝐞𝐚𝐭𝐞 𝐜𝐞𝐫𝐭𝐢𝐟𝐢𝐜𝐚𝐭𝐞 𝐬𝐢𝐠𝐧𝐢𝐧𝐠 𝐫𝐞𝐪𝐮𝐞𝐬𝐭 (𝐂𝐒𝐑) == keytool -keystore kafka.zookeeper.keystore.jks -alias zookeeper -certreq -file ca-request-zookeeper
+𝟓. 𝐒𝐢𝐠𝐧 𝐭𝐡𝐞 𝐂𝐒𝐑 == openssl x509 -req -CA ca-cert -CAkey ca-key -in ca-request-zookeeper -out ca-signed-zookeeper -days 3650 -CAcreateserial
+𝟔. 𝐈𝐦𝐩𝐨𝐫𝐭 𝐭𝐡𝐞 𝐂𝐀 𝐢𝐧𝐭𝐨 𝐊𝐞𝐲𝐬𝐭𝐨𝐫𝐞 == keytool -keystore kafka.zookeeper.keystore.jks -alias ca-cert -import -file ca-cert
+𝟕. 𝐈𝐦𝐩𝐨𝐫𝐭 𝐭𝐡𝐞 𝐬𝐢𝐠𝐧𝐞𝐝 𝐜𝐞𝐫𝐭𝐢𝐟𝐢𝐜𝐚𝐭𝐞 𝐢𝐧𝐭𝐨 𝐊𝐞𝐲𝐬𝐭𝐨𝐫𝐞 == keytool -keystore kafka.zookeeper.keystore.jks -alias zookeeper -import -file ca-signed-zookeeper
+
+1. Fix the certificate authority(CA)
+
+# openssl req -new -x509 -keyout ca-key -out ca-cert -days 3650
+
+2. Create the trustore
+
+# keytool -keystore kafka.zookeeper.truststore.jks -alias ca-cert -import -file ca-cert
+
+3. Create the keystore
+
+# keytool -keystore kafka.zookeeper.keystore.jks -alias zookeeper -validity 3650 -genkey -keyalg RSA -ext SAN=dns:localhost    (note keystore password shuld be same ca password)
+
+4. Create certificate signing request
+
+# keytool -keystore kafka.zookeeper.keystore.jks -alias zookeeper -certreq -file ca-request-zookeeper
+
+5. sing the certificate using CA
+
+# openssl x509 -req -CA ca-cert -CAkey ca-key -in ca-request-zookeeper -out ca-signed-zookeeper -days 3650 -CAcreateserial
+
+6. Import the signed certificate and CA into keystore
+
+# keytool -keystore kafka.zookeeper.keystore.jks -alias ca-cert -import -file ca-cert
+
+# keytool -keystore kafka.zookeeper.keystore.jks -alias zookeeper -import -file ca-signed-zookeeper
+
+# rm ca-cert.srl
+# rm ca-request-zookeeper
+# rm ca-signed-zookeeper
+
+# cd /opt/kafka/config
+
+# nano zookeeper.properties
+
+secureClientPort=2182
+authProvider.x509=org.apache.zookeeper.server.auth.X509AuthenticationProvider
+serverCnxnFactory=org.apache.zookeeper.server.NettyServerCnxnFactory
+ssl.trustStore.location=/opt/kafka/ssl/kafka.zookeeper.truststore.jks
+ssl.trustStore.password=passwd
+ssl.keyStore.location=/opt/kafka/ssl/kafka.zookeeper.keystore.jks
+ssl.keyStore.password=passwd
+ssl.clientAuth=need
+
+
+################
+   ZK-Clinet
+################
+
+# keytool -keystore kafka.zookeeper-client.truststore.jks -alias ca-cert -import -file ca-cert
+
+# keytool -keystore kafka.zookeeper-client.keystore.jks -alias zookeeper-client -validity 3650 -genkey -keyalg RSA -ext SAN=dns:localhost
+
+# keytool -keystore kafka.zookeeper-client.keystore.jks -alias zookeeper-client -certreq -file ca-request-zookeeper-client
+
+# openssl x509 -req -CA ca-cert -CAkey ca-key -in ca-request-zookeeper-client -out ca-signed-zookeeper-client -days 3650 -CAcreateserial
+
+# keytool -keystore kafka.zookeeper-client.keystore.jks -alias ca-cert -import -file ca-cert
+
+# keytool -keystore kafka.zookeeper-client.keystore.jks -alias zookeeper-client -import -file ca-signed-zookeeper-client
+
+# cd /opt/kafka/config
+
+# nano zookeeper-client.properties
+
+zookeeper.clientCnxnSocket=org.apache.zookeeper.ClientCnxnSocketNetty
+zookeeper.ssl.client.enable=true
+zookeeper.ssl.protocol=TLSv1.2
+
+zookeeper.ssl.truststore.location=/opt/kafka/ssl/kafka.zookeeper-client.truststore.jks
+zookeeper.ssl.truststore.password=passwd
+zookeeper.ssl.keystore.location=/opt/kafka/ssl/kafka.zookeeper-client.keystore.jks
+zookeeper.ssl.keystore.password=passwd
+
+# zookeeper-shell.sh localhost:2182 -zk-tls-config-file /opt/kafka/config/zookeeper-client.properties
+
+ls /brokers/ids
+
+
+################
+   broker0
+################
+
+# keytool -keystore kafka.broker0.truststore.jks -alias ca-cert -import -file ca-cert
+
+# keytool -keystore kafka.broker0.keystore.jks -alias broker0 -validity 3650 -genkey -keyalg RSA -ext SAN=dns:localhost
+
+# keytool -keystore kafka.broker0.keystore.jks -alias broker0 -certreq -file ca-request-broker0
+
+# openssl x509 -req -CA ca-cert -CAkey ca-key -in ca-request-broker0 -out ca-signed-broker0 -days 3650 -CAcreateserial
+
+# keytool -keystore kafka.broker0.keystore.jks -alias ca-cert -import -file ca-cert
+
+# keytool -keystore kafka.broker0.keystore.jks -alias broker0 -import -file ca-signed-broker0
+
+# nano nano server-0.properties
+
+zookeeper.connect=localhost:2182
+zookeeper.clientCnxnSocket=org.apache.zookeeper.ClientCnxnSocketNetty
+zookeeper.ssl.client.enable=true
+zookeeper.ssl.protocol=TLSv1.2
+
+zookeeper.ssl.truststore.location=/opt/kafka/ssl/kafka.broker0.truststore.jks
+zookeeper.ssl.truststore.password=passwd
+zookeeper.ssl.keystore.location=/opt/kafka/ssl/kafka.broker0.keystore.jks
+zookeeper.ssl.keystore.password=passwd
+
+
+zookeeper.set.acl=true
+
+# kafka-server-start.sh -daemon /opt/kafka/config/server-0.properties
+
+################
+   broker1
+################
+
+# keytool -keystore kafka.broker1.truststore.jks -alias ca-cert -import -file ca-cert
+
+# keytool -keystore kafka.broker1.keystore.jks -alias broker1 -validity 3650 -genkey -keyalg RSA -ext SAN=dns:localhost
+
+# keytool -keystore kafka.broker1.keystore.jks -alias broker1 -certreq -file ca-request-broker1
+
+# openssl x509 -req -CA ca-cert -CAkey ca-key -in ca-request-broker1 -out ca-signed-broker1 -days 3650 -CAcreateserial
+
+# keytool -keystore kafka.broker1.keystore.jks -alias ca-cert -import -file ca-cert
+
+# keytool -keystore kafka.broker1.keystore.jks -alias broker1 -import -file ca-signed-broker1
+
+# nano nano server-1.properties
+
+zookeeper.connect=localhost:2182
+zookeeper.clientCnxnSocket=org.apache.zookeeper.ClientCnxnSocketNetty
+zookeeper.ssl.client.enable=true
+zookeeper.ssl.protocol=TLSv1.2
+
+zookeeper.ssl.truststore.location=/opt/kafka/ssl/kafka.broker1.truststore.jks
+zookeeper.ssl.truststore.password=passwd
+zookeeper.ssl.keystore.location=/opt/kafka/ssl/kafka.broker1.keystore.jks
+zookeeper.ssl.keystore.password=passwd
+
+zookeeper.set.acl=true
+
+
+
+# bin/kafka-server-start.sh -daemon config/server-1.properties
+
+################
+   broker2
+################
+
+# keytool -keystore kafka.broker2.truststore.jks -alias ca-cert -import -file ca-cert
+
+# keytool -keystore kafka.broker2.keystore.jks -alias broker2 -validity 3650 -genkey -keyalg RSA -ext SAN=dns:localhost
+
+# keytool -keystore kafka.broker2.keystore.jks -alias broker2 -certreq -file ca-request-broker2
+
+# openssl x509 -req -CA ca-cert -CAkey ca-key -in ca-request-broker2 -out ca-signed-broker2 -days 3650 -CAcreateserial
+
+# keytool -keystore kafka.broker2.keystore.jks -alias ca-cert -import -file ca-cert
+
+# keytool -keystore kafka.broker2.keystore.jks -alias broker2 -import -file ca-signed-broker2
+
+# nano nano server-2.properties
+
+zookeeper.connect=localhost:2182
+zookeeper.clientCnxnSocket=org.apache.zookeeper.ClientCnxnSocketNetty
+zookeeper.ssl.client.enable=true
+zookeeper.ssl.protocol=TLSv1.2
+
+zookeeper.ssl.truststore.location=/opt/kafka/ssl/kafka.broker2.truststore.jks
+zookeeper.ssl.truststore.password=passwd
+zookeeper.ssl.keystore.location=/opt/kafka/ssl/kafka.broker2.keystore.jks
+zookeeper.ssl.keystore.password=passwd
+
+
+zookeeper.set.acl=true
+# kafka-server-start.sh -daemon /opt/kafka/config/server-2.properties
+
+
+#############################################################
+									Kafka Config
+#############################################################
+			
+# server-0.properties
+
+listeners=SSL://localhost:9092
+advertised.listeners=SSL://localhost:9092
+
+ssl.truststore.location=/opt/kafka/ssl/kafka.broker0.truststore.jks
+ssl.truststore.password=passwd
+ssl.keystore.location=/opt/kafka/ssl/kafka.broker0.keystore.jks
+ssl.keystore.password=passwd
+
+ssl.key.password=passwd
+
+security.inter.broker.protocol=SSL
+ssl.client.auth=required
+ssl.protocol=TLSv1.2
+
+# server-1.properties
+
+listeners=SSL://localhost:9093
+advertised.listeners=SSL://localhost:9093
+
+ssl.truststore.location=/opt/kafka/ssl/kafka.broker1.truststore.jks
+ssl.truststore.password=passwd
+ssl.keystore.location=/opt/kafka/ssl/kafka.broker1.keystore.jks
+ssl.keystore.password=passwd
+
+ssl.key.password=passwd
+
+security.inter.broker.protocol=SSL
+ssl.client.auth=required
+ssl.protocol=TLSv1.2
+
+
+# server-2.properties
+
+listeners=SSL://localhost:9094
+advertised.listeners=SSL://localhost:9094
+
+ssl.truststore.location=/opt/kafka/ssl/kafka.broker2.truststore.jks
+ssl.truststore.password=passwd
+ssl.keystore.location=/opt/kafka/ssl/kafka.broker2.keystore.jks
+ssl.keystore.password=passwd
+
+ssl.key.password=passwd
+
+security.inter.broker.protocol=SSL
+ssl.client.auth=required
+ssl.protocol=TLSv1.2
+
+
+
+##############
+
+# bin/kafka-topics.sh --list --zookeeper localhost:2181
+
+# kafka-topics.sh --zookeeper localhost:2181 --create --topic ssl-topic --partitions 2 --replication-factor 3
+
+# bin/kafka-topics.sh --zookeeper localhost:2181  --topic ssl-topic --describe
+
+			#############################################################
+									Kafka Clients
+			#############################################################
+			
+			
+################
+   producer
+################
+
+
+# keytool -keystore kafka.producer.truststore.jks -alias ca-cert -import -file ca-cert
+
+# keytool -keystore kafka.producer.keystore.jks -alias producer -validity 3650 -genkey -keyalg RSA -ext SAN=dns:localhost
+
+# keytool -keystore kafka.producer.keystore.jks -alias producer -certreq -file ca-request-producer
+
+# openssl x509 -req -CA ca-cert -CAkey ca-key -in ca-request-producer -out ca-signed-producer -days 3650 -CAcreateserial
+
+# keytool -keystore kafka.producer.keystore.jks -alias ca-cert -import -file ca-cert
+
+# keytool -keystore kafka.producer.keystore.jks -alias producer -import -file ca-signed-producer
+
+# 
+
+# nano producer.properties
+security.protocol=SSL
+ssl.truststore.location=/opt/kafka/ssl/kafka.producer.truststore.jks
+ssl.truststore.password=passwd
+ssl.keystore.location=/opt/kafka/ssl/kafka.producer.keystore.jks
+ssl.keystore.password=passwd
+ssl.key.password=passwd
+ssl.protocol=TLSv1.2
+
+
+# kafka-console-producer.sh --topic ssl-topic --producer.config /opt/kafka/config/producer.properties --broker-list localhost:9092,localhost:9093
+
+			
+################
+   consumer
+################
+
+# keytool -keystore kafka.consumer.truststore.jks -alias ca-cert -import -file ca-cert
+
+# keytool -keystore kafka.consumer.keystore.jks -alias consumer -validity 3650 -genkey -keyalg RSA -ext SAN=dns:localhost
+
+# keytool -keystore kafka.consumer.keystore.jks -alias consumer -certreq -file ca-request-consumer
+
+# openssl x509 -req -CA ca-cert -CAkey ca-key -in ca-request-consumer -out ca-signed-consumer -days 3650 -CAcreateserial
+
+# keytool -keystore kafka.consumer.keystore.jks -alias ca-cert -import -file ca-cert
+
+# keytool -keystore kafka.consumer.keystore.jks -alias consumer -import -file ca-signed-consumer
+
+# nano consumer.properties
+group.id=ssl-consumer-group
+security.protocol=SSL
+ssl.truststore.location=/opt/kafka/ssl/kafka.consumer.truststore.jks
+ssl.truststore.password=passwd
+ssl.keystore.location=/opt/kafka/ssl/kafka.consumer.keystore.jks
+ssl.keystore.password=passwd
+ssl.key.password=passwd
+ssl.protocol=TLSv1.2
+
+
+# bin/kafka-console-consumer.sh --topic ssl-topic --from-beginning --consumer.config config/consumer.properties --bootstrap-server localhost:9092,localhost:9093

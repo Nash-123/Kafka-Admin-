@@ -1,0 +1,15 @@
+kubectl get pods -n kafka
+
+kubectl get pods -n kube-system
+sudo sysctl fs.inotify.max_user_instances=1280
+sudo sysctl fs.inotify.max_user_watches=655360
+sudo ufw disable
+
+kubectl get pods -n kube-system
+# the proxy and dns should be 1/1
+kubectl get pods -n kafka
+NAME                                          READY   STATUS    RESTARTS      AGE
+my-cluster-entity-operator-7f6cd75856-g2l84   2/2     Running   0             39s
+my-cluster-kafka-0                            1/1     Running   0             63s
+my-cluster-zookeeper-0                        1/1     Running   0             6m45s
+strimzi-cluster-operator-86df856f74-nqsbj     1/1     Running   2 (12m ago)   37m

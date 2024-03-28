@@ -1,0 +1,15 @@
+# Create a topic in kafka my-cluster
+kubectl create -n kafka -f my-topic.yml
+
+# list topics in kafka
+kubectl get KafkaTopic -n kafka
+
+kubectl get svc -n kafka
+
+kubectl -n kafka run kafka-producer -ti --image=quay.io/strimzi/kafka:0.29.0-kafka-3.2.0 --rm=true --restart=Never -- bin/kafka-console-producer.sh --bootstrap-server my-cluster-kafka-bootstrap:9092 --topic my-topic
+> produce some messages here
+>msg2
+
+# Lanch a new terminal and run below command
+kubectl -n kafka run kafka-consumer -ti --image=quay.io/strimzi/kafka:0.29.0-kafka-3.2.0 --rm=true --restart=Never -- bin/kafka-console-consumer.sh --bootstrap-server my-cluster-kafka-bootstrap:9092 --topic my-topic --from-beginning
+

@@ -1,0 +1,20 @@
+# exit to the host
+exit
+# stop the prometheus cluster
+cd $HOME/prometheus_kafka
+docker-compose down
+# download & install kubernetes cluster as minikube cluster
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube && rm minikube-linux-amd64
+# additional steps if minikube fails to start
+sudo sysctl fs.inotify.max_user_instances=1280
+sudo sysctl fs.inotify.max_user_watches=655360
+sudo ufw disable
+
+minikube start --memory=8096
+# Install kafka on kubernetes cluster
+kubectl create namespace kafka
+kubectl create -f 'https://strimzi.io/install/latest?namespace=kafka' -n kafka
+#create a single broker kafka cluster on the kubernetes kafka installation done above
+kubectl apply -f https://strimzi.io/examples/latest/kafka/kafka-persistent-single.yaml -n kafka 
+kubectl wait kafka/my-cluster --for=condition=Ready --timeout=600s -n kafka 
